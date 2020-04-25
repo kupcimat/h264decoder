@@ -34,11 +34,11 @@ as appropriate for your system.
 * Building on Linux for 2.7 should be straight forward, provided the requirements are in the usual system locations.
 * Routines work with the ```str``` type in Python 2 and ```bytes``` type in Python 3.
 
-Todo
-----
-
-* Add a video clip for testing and remove hard coded file names in demos/tests.
-* Find boost python for desired python version, at least for boost > 1.67 where it should be possible according to the docs (https://cmake.org/cmake/help/latest/module/FindBoost.html)
+Install and Build
+-----------------
+* Run ```install.sh``` to install all dependencies
+* Run ```build.sh``` to build H264 decoder library
+* Use ```libh264decoder.so``` decoder library file
 
 
 License
