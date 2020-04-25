@@ -10,9 +10,9 @@ extern "C" {
 typedef unsigned char ubyte;
 
 /* For backward compatibility with release 9 or so of libav */
-#if (LIBAVCODEC_VERSION_MAJOR <= 54) 
+#if (LIBAVCODEC_VERSION_MAJOR <= 54)
 #  define av_frame_alloc avcodec_alloc_frame
-#  define av_frame_free  avcodec_free_frame  
+#  define av_frame_free  avcodec_free_frame
 #endif
 
 
@@ -23,14 +23,14 @@ H264Decoder::H264Decoder()
   codec = avcodec_find_decoder(AV_CODEC_ID_H264);
   if (!codec)
     throw H264InitFailure("cannot find decoder");
-  
+
   context = avcodec_alloc_context3(codec);
   if (!context)
     throw H264InitFailure("cannot allocate context");
 
-  if(codec->capabilities & CODEC_CAP_TRUNCATED) {
-    context->flags |= CODEC_FLAG_TRUNCATED;
-  }  
+  if(codec->capabilities & AV_CODEC_CAP_TRUNCATED) {
+    context->flags |= AV_CODEC_FLAG_TRUNCATED;
+  }
 
   int err = avcodec_open2(context, codec, nullptr);
   if (err < 0)
@@ -39,7 +39,7 @@ H264Decoder::H264Decoder()
   parser = av_parser_init(AV_CODEC_ID_H264);
   if (!parser)
     throw H264InitFailure("cannot init parser");
-  
+
   frame = av_frame_alloc();
   if (!frame)
     throw H264InitFailure("cannot allocate frame");
@@ -67,7 +67,7 @@ H264Decoder::~H264Decoder()
 
 std::size_t H264Decoder::parse(const ubyte* in_data, std::size_t in_size)
 {
-  auto nread = av_parser_parse2(parser, context, &pkt->data, &pkt->size, 
+  auto nread = av_parser_parse2(parser, context, &pkt->data, &pkt->size,
                                 in_data, (int)in_size,
                                 0, 0, AV_NOPTS_VALUE);
   return nread;
@@ -110,16 +110,16 @@ const AVFrame& ConverterRGB24::convert(const AVFrame &frame, ubyte* out_rgb)
   int w = frame.width;
   int h = frame.height;
   int pix_fmt = frame.format;
-  
-  context = sws_getCachedContext(context, 
-                                 w, h, (AVPixelFormat)pix_fmt, 
-                                 w, h, PIX_FMT_RGB24, SWS_BILINEAR, 
+
+  context = sws_getCachedContext(context,
+                                 w, h, (AVPixelFormat)pix_fmt,
+                                 w, h, AV_PIX_FMT_RGB24, SWS_BILINEAR,
                                  nullptr, nullptr, nullptr);
   if (!context)
     throw H264DecodeFailure("cannot allocate context");
-  
+
   // Setup framergb with out_rgb as external buffer. Also say that we want RGB24 output.
-  avpicture_fill((AVPicture*)framergb, out_rgb, PIX_FMT_RGB24, w, h);
+  avpicture_fill((AVPicture*)framergb, out_rgb, AV_PIX_FMT_RGB24, w, h);
   // Do the conversion.
   sws_scale(context, frame.data, frame.linesize, 0, h,
             framergb->data, framergb->linesize);
@@ -131,14 +131,14 @@ const AVFrame& ConverterRGB24::convert(const AVFrame &frame, ubyte* out_rgb)
 /*
 Determine required size of framebuffer.
 
-avpicture_get_size is used in http://dranger.com/ffmpeg/tutorial01.html 
-to do this. However, avpicture_get_size returns the size of a compact 
-representation, without padding bytes. Since we use avpicture_fill to 
+avpicture_get_size is used in http://dranger.com/ffmpeg/tutorial01.html
+to do this. However, avpicture_get_size returns the size of a compact
+representation, without padding bytes. Since we use avpicture_fill to
 fill the buffer we should also use it to determine the required size.
 */
 int ConverterRGB24::predict_size(int w, int h)
 {
-  return avpicture_fill((AVPicture*)framergb, nullptr, PIX_FMT_RGB24, w, h);  
+  return avpicture_fill((AVPicture*)framergb, nullptr, AV_PIX_FMT_RGB24, w, h);
 }
 
 
