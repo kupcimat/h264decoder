@@ -6,7 +6,6 @@ find_package(PythonInterp REQUIRED)
 find_package(PythonLibs REQUIRED)
 find_package(Boost REQUIRED COMPONENTS "python")
 message (WARNING "This script cannot automatically determine the correct boost python library for your python version. Please check.")
-# TODO: 
 
 include_directories(${PYTHON_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
@@ -33,9 +32,7 @@ if (WIN32)
   set_target_properties(h264decoder PROPERTIES PREFIX "lib")
   set_target_properties(h264decoder PROPERTIES SUFFIX ".pyd")
 else()
-  add_custom_command(TARGET h264decoder POST_BUILD
-              COMMAND ${CMAKE_COMMAND} -E create_symlink 
-              ${CMAKE_BINARY_DIR}/libh264decoder.so ${CMAKE_SOURCE_DIR}/libh264decoder.so)
+  set_target_properties(h264decoder PROPERTIES PREFIX "lib")
+  set_target_properties(h264decoder PROPERTIES SUFFIX ".so")
 endif()
 install(TARGETS h264decoder LIBRARY DESTINATION . ARCHIVE DESTINATION .)
- 
